@@ -1,0 +1,3 @@
+[submodule "coursera/coursera-dl"]
+	path = coursera/coursera-dl
+	url = git@github.com:coursera-dl/coursera-dl.git
