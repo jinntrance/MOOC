@@ -1,13 +1,17 @@
 % This file was published on Wed Nov 14 20:48:30 2012, UTC.
 
-function a4_main(n_hid, lr_rbm, lr_classification, n_iterations)
+function hidden = a4_main(n_hid, lr_rbm, lr_classification, n_iterations)
 % first, train the rbm
     global report_calls_to_sample_bernoulli
+    global hidden
+    global weight
+
     report_calls_to_sample_bernoulli = false;
-    global data_sets
+    global data_sets;
     if prod(size(data_sets)) ~= 1,
         error('You must run a4_init before you do anything else.');
     end
+
     rbm_w = optimize([n_hid, 256], ...
                      @(rbm_w, data) cd1(rbm_w, data.inputs), ...  % discard labels
                      data_sets.training, ...
@@ -17,7 +21,11 @@ function a4_main(n_hid, lr_rbm, lr_classification, n_iterations)
     show_rbm(rbm_w);
     input_to_hid = rbm_w;
     % calculate the hidden layer representation of the labeled data
+
     hidden_representation = logistic(input_to_hid * data_sets.training.inputs);
+
+    weight = rbm_w;
+    hidden = hidden_representation;
     % train hid_to_class
     data_2.inputs = hidden_representation;
     data_2.targets = data_sets.training.targets;
@@ -53,7 +61,7 @@ function d_phi_by_d_input_to_class = classification_phi_gradient(input_to_class,
     d_loss_by_d_input_to_class = d_loss_by_d_class_input * data.inputs.'; % size: <number of classes> by <number of input units>
     d_phi_by_d_input_to_class = -d_loss_by_d_input_to_class;
 end
- 
+
 function indices = argmax_over_rows(matrix)
     [dump, indices] = max(matrix);
 end
@@ -64,4 +72,3 @@ function ret = log_sum_exp_over_rows(matrix)
   maxs_big = repmat(maxs_small, [size(matrix, 1), 1]);
   ret = log(sum(exp(matrix - maxs_big), 1)) + maxs_small;
 end
-
